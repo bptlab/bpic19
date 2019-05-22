@@ -1,3 +1,10 @@
+from typing import List, Any
+
+
+def get_percentage(total: int, observations: int) -> float:
+	return (100/total) * observations
+
+
 def check_cardinality(log, activity: str, upper: int, lower: int) -> dict:
 	"""
 
@@ -14,15 +21,16 @@ def check_cardinality(log, activity: str, upper: int, lower: int) -> dict:
 	for trace in log:
 
 		events = trace['events']
-		observations = list(filter(lambda x: x == activity, events))
+		counter = events.count(activity)
 
-		if len(observations) < lower:
+		if counter < lower:
 			violation_lower += 1
-		elif len(observations) > upper and upper != -1:
+		elif counter > upper != -1:
 			violation_upper += 1
 
-	return {'activity': activity, 'violation upper': violation_upper,
-			'violation lower': violation_lower}
+	return {'activity': activity,
+			'violation upper': (violation_upper, get_percentage(len(log), violation_upper)),
+			'violation lower': (violation_lower, get_percentage(len(log), violation_lower))}
 
 
 def check_order(log, first: str, second: str) -> dict:
@@ -35,6 +43,7 @@ def check_order(log, first: str, second: str) -> dict:
 	"""
 
 	violations = 0
+	traces = 0
 
 	for trace in log:
 		events = trace['events']
@@ -42,6 +51,8 @@ def check_order(log, first: str, second: str) -> dict:
 
 		if first not in events or second not in events:
 			break
+
+		traces += 1
 
 		for event in events:
 			if event == first:
@@ -51,7 +62,7 @@ def check_order(log, first: str, second: str) -> dict:
 			elif event == second and len(first_stack) == 0:
 				violations += 1
 
-	return {'first': first, 'second': second, 'violations': violations}
+	return {'first': first, 'second': second, 'violations': (violations, get_percentage(traces, violations))}
 
 
 def check_response(log, request: str, response: str) -> dict:
@@ -64,20 +75,30 @@ def check_response(log, request: str, response: str) -> dict:
 	"""
 
 	violations = 0
+	traces = 0
+	violated_traces = 0
 
 	for trace in log:
 		events = trace['events']
 		request_stack = []
+		trace_contain = True
 
 		for event in events:
 			if event == request:
 				request_stack.append(event)
+				if trace_contain:
+					traces += 1
+					trace_contain = False
+
 			elif event == response and len(request_stack) > 0:
 				request_stack.pop()
 
-		violations += len(request_stack)
+		if len(request_stack) > 0:
+			violations += len(request_stack)
+			violated_traces += 1
 
-	return {'request': request, 'response': response, 'violations': violations}
+	return {'request': request, 'response': response,
+			'violations': (violations, traces, violated_traces, get_percentage(traces, violated_traces))}
 
 
 def check_precedence(log, preceding: str, request: str) -> dict:
