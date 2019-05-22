@@ -62,12 +62,14 @@ def check_order(log, first: str, second: str) -> dict:
     return {'first': first, 'second': second, 'violations': (violations, get_percentage(traces, violations))}
 
 
-def check_response(log, request: str, response: str) -> dict:
+def check_response(log, request: str, response: str, single_occurrence = False) -> dict:
     """
 
     :param log: event log
     :param request: activity which expects a requested activity
     :param response: requested activity
+    :param single_occurrence: specifies whether a single occurrence of the
+    responding activity already satisfies the rule
     :return: report
     """
 
@@ -82,21 +84,26 @@ def check_response(log, request: str, response: str) -> dict:
         res_count = events.count(response)
 
         if req_count > 0:
-            traces += 1
-            if req_count > res_count:
-                violated_traces += 1
+            traces += 1  # relevant traces
+            if req_count > res_count and not single_occurrence:
+                violated_traces += 1  # violated traces
                 violations += req_count - res_count
+            elif single_occurrence and res_count == 0:
+                violated_traces += 1  # violated traces
+                violations += 1
 
     return {'request': request, 'response': response,
-            'violations': (violations, violated_traces, get_percentage(traces, violated_traces))}
+            'violations': (violations, traces, violated_traces, get_percentage(traces, violated_traces))}
 
 
-def check_precedence(log, preceding: str, request: str) -> dict:
+def check_precedence(log, preceding: str, request: str, single_occurrence = False) -> dict:
     """
 
     :param log: event log
     :param preceding: activity that should precede the requesting activity
     :param request: requesting activity
+    :param single_occurrence: specifies whether a single occurrence of the
+    preceding activity already satisfies the rule
     :return: report
     """
 
@@ -112,9 +119,12 @@ def check_precedence(log, preceding: str, request: str) -> dict:
 
         if req_count > 0:
             traces += 1
-            if req_count > pre_count:
+            if req_count > pre_count and not single_occurrence:
                 violated_traces += 1
                 violations += req_count - pre_count
+            elif single_occurrence and pre_count == 0:
+                violated_traces += 1  # violated traces
+                violations += 1
 
     return {'preceding': preceding, 'request': request,
             'violations': (violations, violated_traces, get_percentage(traces, violated_traces))}
