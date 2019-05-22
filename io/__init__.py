@@ -17,7 +17,7 @@ def import_xes_log(file):
 	root = tree.getroot()
 	# find all traces
 	print(root)
-	prefix = '{http://www.xes-standard.org}'
+	prefix = ''#''{http://www.xes-standard.org}'
 	traces = root.findall(''.join([prefix, 'trace']))
 
 	for t in traces:

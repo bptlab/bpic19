@@ -62,7 +62,7 @@ def check_order(log, first: str, second: str) -> dict:
     return {'first': first, 'second': second, 'violations': (violations, get_percentage(traces, violations))}
 
 
-def check_response(log, request: str, response: str, single_occurrence = False) -> dict:
+def check_response(log, request: str, response: str, single_occurrence=False) -> dict:
     """
 
     :param log: event log
@@ -93,10 +93,10 @@ def check_response(log, request: str, response: str, single_occurrence = False) 
                 violations += 1
 
     return {'request': request, 'response': response,
-            'violations': (violations, traces, violated_traces, get_percentage(traces, violated_traces))}
+            'violations': (violations, violated_traces, get_percentage(traces, violated_traces))}
 
 
-def check_precedence(log, preceding: str, request: str, single_occurrence = False) -> dict:
+def check_precedence(log, preceding: str, request: str, single_occurrence=False) -> dict:
     """
 
     :param log: event log
