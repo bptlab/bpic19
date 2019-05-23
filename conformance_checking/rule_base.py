@@ -52,16 +52,14 @@ class Rule_Checker():
 			events = trace['events']
 			first_stack = []
 
-			if first not in events or second not in events:
-				break
+			if first in events or second in events:
+				traces += 1
 
-			traces += 1
-
-			for event in events:
-				if event == first:
-					first_stack.append(event)
-				elif event == second and len(first_stack) == 0:
-					violations += 1
+				for event in events:
+					if event == first:
+						first_stack.append(event)
+					elif event == second and len(first_stack) == 0:
+						violations += 1
 
 		return {'first': first, 'second': second,
 				'violations': (violations,
