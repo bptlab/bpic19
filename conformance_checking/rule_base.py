@@ -52,7 +52,7 @@ class Rule_Checker():
 			events = trace['events']
 			first_stack = []
 
-			if first in events or second in events:
+			if first in events and second in events:
 				traces += 1
 
 				for event in events:

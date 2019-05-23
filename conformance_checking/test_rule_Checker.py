@@ -61,5 +61,5 @@ class TestRule_Checker(TestCase):
 		self.assertEqual(res['violations'][0], 0)
 
 		res = self.rc.check_exclusive(self.log, 'A', 'B')
-		self.assertEqual(res['violations'][0], 2)
+		self.assertEqual(res['violations'][0], 4)
 
