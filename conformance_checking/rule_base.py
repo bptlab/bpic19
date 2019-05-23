@@ -83,7 +83,6 @@ class Rule_Checker():
 		traces = 0
 		violated_traces = 0
 
-
 		for trace in log:
 			events = trace['events']
 			req_stack = []
@@ -99,7 +98,6 @@ class Rule_Checker():
 							tracked = True
 					elif event == response and len(req_stack) > 0:
 						req_stack.pop()
-
 
 				if len(req_stack) > 0:
 					violations += len(req_stack)
@@ -118,11 +116,9 @@ class Rule_Checker():
 					violated_traces += 1
 					violations += 1
 
-
 		return {'request': request, 'response': response,
 			'violations': (violations, violated_traces,
 						   self.get_percentage(traces, violated_traces))}
-
 
 	def check_precedence(self, log, preceding: str, request: str,
 						 single_occurrence=False) -> dict:
@@ -165,11 +161,9 @@ class Rule_Checker():
 						traces += 1
 						tracked = True
 
-
 		return {'preceding': preceding, 'request': request,
 				'violations': (violations, violated_traces,
 							   self.get_percentage(traces, violated_traces))}
-
 
 	def check_exclusive(self, log, first_activity: str, second_activity: str) \
 			-> dict:

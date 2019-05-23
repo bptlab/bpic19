@@ -10,14 +10,13 @@ def import_csv_log(file: str):
 	return pd.read_csv(file)
 
 
-def import_xes_log(file):
+def import_xes_log(file, prefix=''):
 	log = []
 
 	tree = xmlTree.parse(file)
 	root = tree.getroot()
 	# find all traces
 	print(root)
-	prefix = ''#''{http://www.xes-standard.org}'
 	traces = root.findall(''.join([prefix, 'trace']))
 
 	for t in traces:
