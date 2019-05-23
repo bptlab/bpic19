@@ -10,7 +10,7 @@ working_dir = Path("C:/Users/Simon.Remy/ownCloud/Projects/BPI19/BPI19 - Logs")
 os.chdir(working_dir)
 print('changed directory to: %s' % os.getcwd())
 
-log_file = Path("3-way invoice after GR/without EC/Invoice after GR (without EC).xes")
+log_file = Path("3-way invoice before GR/") # TODO
 
 log = import_xes_log(log_file, '{http://www.xes-standard.org}')
 print('length: %s' % len(log))
@@ -19,13 +19,13 @@ print(log[0])
 rc = Rule_Checker()
 # %%
 print('####### order rules ########')
-res = rc.check_order(log, 'Create Purchase Order Item', 'Delete Purchase Order Item')
+res = rc.check_order(log, 'Remove Payment Block', 'Clear Invoice')
 pprint(res)
 
-res = rc.check_order(log, 'Record Service Entry Sheet', 'Record Invoice Receipt')
+res = rc.check_order(log, 'Change Quantity', 'Record Invoice Receipt')
 pprint(res)
 
-res = rc.check_order(log, 'Record Goods Receipt', 'Record Invoice Receipt')
+res = rc.check_order(log, 'Change Quantity', 'Record Goods Receipt')
 pprint(res)
 # %%
 print('####### response rules ########')
@@ -43,27 +43,24 @@ pprint(res)
 
 # %%
 print('####### precedence rules ########')
-res = rc.check_precedence(log, 'Vendor creates invoice', 'Record Invoice Receipt', True)
+res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice')
 pprint(res)
 
 res = rc.check_precedence(log, 'Record Goods Receipt', 'Clear Invoice')
 pprint(res)
 
-res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice')
-pprint(res)
-
-res = rc.check_precedence(log, 'Record Goods Receipt', 'Record Invoice Receipt')
-pprint(res)
-
-res = rc.check_precedence(log, 'Create Purchase Order Item', 'Change Approval for Purchase Order', True)
-pprint(res)
-
-res = rc.check_precedence(log, 'Create Purchase Order Item', 'Vendor creates invoice', True)
+res = rc.check_precedence(log, 'Set Payment Block', 'Remove Payment Block')
 pprint(res)
 
 # %%
 print('####### cardinality rules ########')
 res = rc.check_cardinality(log, 'Create Purchase Order Item', 1, 1)
+pprint(res)
+
+res = rc.check_cardinality(log, 'Change Price', 1, 0)
+pprint(res)
+
+res = rc.check_cardinality(log, 'Change Quantity', 1, 0)
 pprint(res)
 
 res = rc.check_cardinality(log, 'Record Goods Receipt', 1, 1)
@@ -80,4 +77,5 @@ pprint(res)
 
 # %%
 print('####### exclusive rules ########')
-res = rc.check_exclusive(log, 'Delete Purchase Order Item', 'Clear Invoice')
+res = rc.check_exclusive(log, 'Receive Order Confirmation', 'Clear Price')
+print(res)

@@ -116,7 +116,8 @@ class Rule_Checker():
 
 		return {'request': request, 'response': response,
 			'violations': (violations, violated_traces,
-						   self.get_percentage(traces, violated_traces))}
+						   self.get_percentage(traces, violated_traces)),
+				'single': single_occurrence}
 
 	def check_precedence(self, log, preceding: str, request: str,
 						 single_occurrence=False) -> dict:
@@ -161,7 +162,8 @@ class Rule_Checker():
 
 		return {'preceding': preceding, 'request': request,
 				'violations': (violations, violated_traces,
-							   self.get_percentage(traces, violated_traces))}
+							   self.get_percentage(traces, violated_traces)),
+				'single': single_occurrence}
 
 	def check_exclusive(self, log, first_activity: str, second_activity: str) \
 			-> dict:
