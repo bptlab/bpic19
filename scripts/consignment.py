@@ -21,6 +21,6 @@ rc = Rule_Checker()
 print('####### precedence rules ########')
 res = rc.check_precedence(log, 'Create Purchase Order Item', 'Record Goods Receipt')
 pprint(res)
-
+print()
 res = rc.check_precedence(log, 'Create Purchase Order Item', 'Record Goods Receipt', True)
 pprint(res)

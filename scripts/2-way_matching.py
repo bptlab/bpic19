@@ -21,10 +21,10 @@ rc = Rule_Checker()
 print('####### response rules ########')
 res = rc.check_response(log, 'Vendor creates invoice', 'Record Invoice Receipt')
 pprint(res)
-
+print()
 res = rc.check_response(log, 'Record Invoice Receipt', 'Clear Invoice')
 pprint(res)
-
+print()
 print('####### precedence rules ########')
 res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice')
 pprint(res)
