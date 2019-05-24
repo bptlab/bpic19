@@ -11,6 +11,7 @@ os.chdir(working_dir)
 print('changed directory to: %s' % os.getcwd())
 
 log_file = Path("3-way invoice after GR/without EC/Invoice after GR (without EC).xes")
+log_file_short = str(log_file).split('.xes')[0]
 
 log = import_xes_log(log_file, '{http://www.xes-standard.org}')
 print('length: %s' % len(log))
@@ -51,27 +52,27 @@ print()
 
 # %%
 print('####### precedence rules ########')
-res = rc.check_precedence(log, 'Vendor creates invoice', 'Record Invoice Receipt', True)
+res = rc.check_precedence(log, 'Vendor creates invoice', 'Record Invoice Receipt', True, file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Record Goods Receipt', 'Clear Invoice')
+res = rc.check_precedence(log, 'Record Goods Receipt', 'Clear Invoice', file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice')
+res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice', file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Record Goods Receipt', 'Record Invoice Receipt')
+res = rc.check_precedence(log, 'Record Goods Receipt', 'Record Invoice Receipt', file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Create Purchase Order Item', 'Change Approval for Purchase Order', True)
+res = rc.check_precedence(log, 'Create Purchase Order Item', 'Change Approval for Purchase Order', True, file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Create Purchase Order Item', 'Vendor creates invoice', True)
+res = rc.check_precedence(log, 'Create Purchase Order Item', 'Vendor creates invoice', True, file=log_file_short)
 pprint(res)
 print()
 

@@ -1,11 +1,16 @@
 class Rule_Checker():
 
 	def get_percentage(self, total: int, observations: int) -> float:
-		return round((100 / total) * observations, 2)
+		return round((100 / total) * observations, 4)
 
-	def check_cardinality(self, log, activity: str, upper: int, lower: int) \
-			-> \
-			dict:
+	def export_case_ids(self, file: str, ids: list):
+		file = file + '.csv'
+		with open(file, "w") as f:
+			for case_id in ids:
+				f.write("%s\n" % case_id)
+			f.close()
+
+	def check_cardinality(self, log, activity: str, upper: int, lower: int) -> dict:
 		"""
 
 		:param log: event log
@@ -78,7 +83,7 @@ class Rule_Checker():
 		"""
 
 		violations = 0
-		traces = 0
+		candidate_traces = 0
 		violated_traces = 0
 
 		for trace in log:
@@ -87,40 +92,63 @@ class Rule_Checker():
 
 			tracked = False
 
-			if not single_occurrence:
-				for event in events:
-					if event == request:
-						req_stack.append(event)
-						if not tracked:
-							traces += 1
-							tracked = True
-					elif event == response and len(req_stack) > 0:
-						req_stack.pop()
-
-				if len(req_stack) > 0:
-					violations += len(req_stack)
-					violated_traces += 1
-			else:
-				if request in events and response in events:
-					traces += 1
-					req_idx = events[::-1].index(request)
-					res_idx = events[::-1].index(response)
-
-					if req_idx < res_idx:
-						violations += 1
+			if request in events:
+				candidate_traces += 1
+				if single_occurrence:
+					if response in events:
+						req_idx = events[::-1].index(request)
+						res_idx = events[::-1].index(response)
+						if req_idx < res_idx:
+							violations += 1
+							violated_traces += 1
+					else:
 						violated_traces += 1
-				elif request in events and response not in events:
-					traces += 1
-					violated_traces += 1
-					violations += 1
+						violations += 1
+				else:
+					for event in events:
+						if event == request:
+							req_stack.append(event)
+						elif event == response and len(req_stack) > 0:
+							req_stack.pop()
+					if len(req_stack) > 0:
+						violated_traces += 1
+						violations += len(req_stack)
+
+			#
+			# if not single_occurrence:
+			# 	for event in events:
+			# 		if event == request:
+			# 			req_stack.append(event)
+			# 			if not tracked:
+			# 				traces += 1
+			# 				tracked = True
+			# 		elif event == response and len(req_stack) > 0:
+			# 			req_stack.pop()
+			#
+			# 	if len(req_stack) > 0:
+			# 		violations += len(req_stack)
+			# 		violated_traces += 1
+			# else:
+			# 	if request in events and response in events:
+			# 		traces += 1
+			# 		req_idx = events[::-1].index(request)
+			# 		res_idx = events[::-1].index(response)
+			#
+			# 		if req_idx < res_idx:
+			# 			violations += 1
+			# 			violated_traces += 1
+			# 	elif request in events and response not in events:
+			# 		traces += 1
+			# 		violated_traces += 1
+			# 		violations += 1
 
 		return {'request': request, 'response': response,
 			'violations': (violations, violated_traces,
-						   self.get_percentage(traces, violated_traces)),
+						   self.get_percentage(candidate_traces, violated_traces)),
 				'single': single_occurrence}
 
 	def check_precedence(self, log, preceding: str, request: str,
-						 single_occurrence=False) -> dict:
+						 single_occurrence=False, file='') -> dict:
 		"""
 
 		:param log: event log
@@ -132,41 +160,54 @@ class Rule_Checker():
 		"""
 
 		violations = 0
-		traces = 0
+		candidate_traces = 0
+		trace_ids = []
 		violated_traces = 0
 
 		for trace in log:
 			events = trace['events']
 			pre_stack = []
-
 			tracked = False
-			violated_trace_tracked = False
 
-			for event in events:
-				if event == preceding:
-					pre_stack.append(event)
-				elif event == request and len(pre_stack) > 0:
-					if not single_occurrence:
-						pre_stack.pop()
-					if not tracked:
-						traces += 1
-						tracked = True
-				elif event == request:
-					violations += 1
-					if not violated_trace_tracked:
+			if request in events:
+				candidate_traces += 1
+				if single_occurrence:
+					if preceding in events:
+						request_idx = events.index(request)
+						preceding_idx = events.index(preceding)
+						if request_idx < preceding_idx:
+							violations += 1
+							violated_traces += 1
+							trace_ids.append(','.join([trace['trace_id'], trace['vendor'], trace['value'],
+													   trace['spend_area'], trace['item_type']]))
+					else:
+						trace_ids.append(','.join([trace['trace_id'], trace['vendor'], trace['value'],
+												   trace['spend_area'], trace['item_type']]))
+						violations += 1
 						violated_traces += 1
-						violated_trace_tracked = True
-					if not tracked:
-						traces += 1
-						tracked = True
+				else:
+					for event in events:
+						if event == preceding:
+							pre_stack.append(event)
+						elif event == request and len(pre_stack) > 0:
+							pre_stack.pop()
+						elif event == request:
+							violations += 1
+							if not tracked:
+								trace_ids.append(','.join([trace['trace_id'], trace['vendor'], trace['value'],
+														   trace['spend_area'], trace['item_type']]))
+								violated_traces += 1
+								tracked = True
+		if len(file) > 0:
+			file = '_'.join([file, 'precedence', preceding, request, str(single_occurrence)])
+			self.export_case_ids(file, trace_ids)
 
 		return {'preceding': preceding, 'request': request,
 				'violations': (violations, violated_traces,
-							   self.get_percentage(traces, violated_traces)),
+							   self.get_percentage(candidate_traces, violated_traces)),
 				'single': single_occurrence}
 
-	def check_exclusive(self, log, first_activity: str, second_activity: str) \
-			-> dict:
+	def check_exclusive(self, log, first_activity: str, second_activity: str) -> dict:
 		"""
 
 		:param log: event log

@@ -22,6 +22,10 @@ class TestRule_Checker(TestCase):
 		res = self.rc.get_percentage(450, 20)
 		self.assertEqual(res, 4.44)
 
+	def test_export_case_ids(self):
+		ids = ['123', '456', '789']
+		self.rc.export_case_ids('test_ids.txt', ids)
+
 	def test_check_cardinality(self):
 		res = self.rc.check_cardinality(self.log, 'A', 1, 0)
 
@@ -50,11 +54,39 @@ class TestRule_Checker(TestCase):
 		self.assertEqual(res['violations'], (2, 1, 100.0))
 
 	def test_check_precedence(self):
-		res = self.rc.check_precedence(self.log, 'B', 'C')
-		self.assertEqual(res['violations'], (2, 2, 50.0))
 
-		res = self.rc.check_precedence(self.log, 'B', 'C', True)
-		self.assertEqual(res['violations'], (1, 1, 25.0))
+		log = [
+			{'trace_id': '1', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a', 'events': ['A', 'B']},
+			{'trace_id': '2', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a', 'events': ['A', 'B', 'R']}, # fail 1
+			{'trace_id': '3', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a', 'events': ['A', 'P', 'B', 'R']}, #t
+			{'trace_id': '4', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a', 'events': ['A', 'R', 'B', 'P']}, # fail 1
+			{'trace_id': '5', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a', 'events': ['A', 'P', 'B', 'P', 'R']}, # t
+			{'trace_id': '6', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P', 'B', 'R', 'R']}, # fail 1
+			{'trace_id': '7', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P', 'B', 'P', 'R', 'R']}, # t
+			{'trace_id': '8',  'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P']},
+			{'trace_id': '9',  'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'R', 'P', 'R', 'P']}, # fail 1
+			{'trace_id': '10', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'R', 'R']} # fail 2
+		]
+
+		res = self.rc.check_precedence(log, 'P', 'R')
+		self.assertEqual(res['violations'], (6, 5, 62.5))
+
+	def test_check_precedence_single(self):
+
+		log = [
+			{'trace_id': '1', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'B']},
+			{'trace_id': '2', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'B', 'R']},  # fail 1
+			{'trace_id': '3', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P', 'B', 'R']},  # t
+			{'trace_id': '4', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'R', 'B', 'P']},  # fail 1
+			{'trace_id': '5', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P', 'B', 'P', 'R']},  # t
+			{'trace_id': '6', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P', 'B', 'R', 'R']},  # t
+			{'trace_id': '7', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P', 'B', 'P', 'R', 'R']},  # t
+			{'trace_id': '8', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'P']},
+			{'trace_id': '9', 'vendor': 'A', 'value': 'a', 'spend_area': 'a', 'item_type': 'a','events': ['A', 'R', 'P', 'R', 'P']}  # fail 1
+		]
+
+		res = self.rc.check_precedence(log, 'P', 'R', True)
+		self.assertEqual(res['violations'], (3, 3, 42.86))
 
 	def test_check_exclusive(self):
 		res = self.rc.check_exclusive(self.log, 'E', 'F')

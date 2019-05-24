@@ -11,6 +11,7 @@ os.chdir(working_dir)
 print('changed directory to: %s' % os.getcwd())
 
 log_file = Path("Invoice before GR (Standard).xes")
+log_file_short = str(log_file).split('.xes')[0]
 
 log = import_xes_log(log_file, '{http://www.xes-standard.org}')
 print('length: %s' % len(log))
@@ -51,15 +52,27 @@ print()
 
 # %%
 print('####### precedence rules ########')
-res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice')
+res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice', file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Record Goods Receipt', 'Clear Invoice')
+res = rc.check_precedence(log, 'Record Invoice Receipt', 'Clear Invoice', True, file=log_file_short)
 pprint(res)
 print()
 
-res = rc.check_precedence(log, 'Set Payment Block', 'Remove Payment Block')
+res = rc.check_precedence(log, 'Record Goods Receipt', 'Clear Invoice', file=log_file_short)
+pprint(res)
+print()
+
+res = rc.check_precedence(log, 'Record Goods Receipt', 'Clear Invoice', True, file=log_file_short)
+pprint(res)
+print()
+
+res = rc.check_precedence(log, 'Record Invoice Receipt', 'Vendor creates invoice', file=log_file_short)
+pprint(res)
+print()
+
+res = rc.check_precedence(log, 'Set Payment Block', 'Remove Payment Block', file=log_file_short)
 pprint(res)
 print()
 
