@@ -12,6 +12,7 @@ class Rule_Checker():
 
 	def check_cardinality(self, log, activity: str, upper: int, lower: int) -> dict:
 		"""
+		Check cardinalities for given activity.
 
 		:param log: event log
 		:param activity: name of the activity
@@ -43,6 +44,7 @@ class Rule_Checker():
 
 	def check_order(self, log, first: str, second: str) -> dict:
 		"""
+		Check the order of the given activities.
 
 		:param log: event log
 		:param first: activity
@@ -73,6 +75,8 @@ class Rule_Checker():
 	def check_response(self, log, request: str, response: str,
 					   single_occurrence=False) -> dict:
 		"""
+		Check response requirements of the given activity.
+
 
 		:param log: event log
 		:param request: activity which expects a requested activity
@@ -114,34 +118,6 @@ class Rule_Checker():
 						violated_traces += 1
 						violations += len(req_stack)
 
-			#
-			# if not single_occurrence:
-			# 	for event in events:
-			# 		if event == request:
-			# 			req_stack.append(event)
-			# 			if not tracked:
-			# 				traces += 1
-			# 				tracked = True
-			# 		elif event == response and len(req_stack) > 0:
-			# 			req_stack.pop()
-			#
-			# 	if len(req_stack) > 0:
-			# 		violations += len(req_stack)
-			# 		violated_traces += 1
-			# else:
-			# 	if request in events and response in events:
-			# 		traces += 1
-			# 		req_idx = events[::-1].index(request)
-			# 		res_idx = events[::-1].index(response)
-			#
-			# 		if req_idx < res_idx:
-			# 			violations += 1
-			# 			violated_traces += 1
-			# 	elif request in events and response not in events:
-			# 		traces += 1
-			# 		violated_traces += 1
-			# 		violations += 1
-
 		return {'request': request, 'response': response,
 			'violations': (violations, violated_traces,
 						   self.get_percentage(candidate_traces, violated_traces)),
@@ -150,6 +126,7 @@ class Rule_Checker():
 	def check_precedence(self, log, preceding: str, request: str,
 						 single_occurrence=False, file='') -> dict:
 		"""
+		Check precedence requirements of the given activity.
 
 		:param log: event log
 		:param preceding: activity that should precede the requesting activity
@@ -209,6 +186,8 @@ class Rule_Checker():
 
 	def check_exclusive(self, log, first_activity: str, second_activity: str) -> dict:
 		"""
+		Check the exclusiveness of two activities.
+
 
 		:param log: event log
 		:param first_activity: activity

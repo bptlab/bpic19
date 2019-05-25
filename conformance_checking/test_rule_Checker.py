@@ -11,11 +11,11 @@ class TestRule_Checker(TestCase):
 				{'trace': 1, 'events': ['A', 'B', 'D', 'C', 'E']},
 				{'trace': 2, 'events': ['A', 'B', 'D', 'B', 'F']},
 				{'trace': 3, 'events': ['B', 'C', 'E']},
-				{'trace': 1, 'events': ['B', 'E']},
-				{'trace': 1,
+				{'trace': 4, 'events': ['B', 'E']},
+				{'trace': 5,
 				 'events': ['A', 'B', 'C', 'E', 'C', 'D']}, # single pre
-				{'trace': 1, 'events': ['A', 'C', 'B', 'E', 'C', 'D']},
-				{'trace': 1, 'events': ['G', 'G', 'E', 'T', 'G']},
+				{'trace': 6, 'events': ['A', 'C', 'B', 'E', 'C', 'D']},
+				{'trace': 7, 'events': ['G', 'G', 'E', 'T', 'G']},
 			]
 
 	def test_get_percentage(self):
