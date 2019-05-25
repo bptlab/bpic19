@@ -5,7 +5,7 @@ from pprint import pprint
 from conformance_checking.rule_base import Rule_Checker
 from util import import_xes_log
 # %%
-working_dir = Path("C:/Users/Simon.Remy/ownCloud/Projects/BPI19/BPI19 - Logs")
+working_dir = Path("...")
 
 os.chdir(working_dir)
 print('changed directory to: %s' % os.getcwd())
